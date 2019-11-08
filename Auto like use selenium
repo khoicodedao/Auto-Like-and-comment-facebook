@@ -1,0 +1,363 @@
+using ExcelDataReader;
+using LinqToExcel;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Firefox;
+using OpenQA.Selenium.Interactions;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Data.OleDb;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Runtime.InteropServices;
+using OpenQA.Selenium.Support.UI;  
+
+namespace Facebook
+{
+    public partial class Form1 : Form
+    {
+        //--------data to login--------------
+        string email="";
+        string pass1="";
+        string link = "";
+        
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var driver = new FirefoxDriver() ;
+            driver.Url = "https://accounts.google.com/signin/v2/identifier?service=mail&flowName=GlifWebSignIn&flowEntry=ServiceLogin";
+            Title.Text=driver.Title.ToString();
+            //user
+            var user = driver.FindElementByXPath("//*[@id=\"identifierId\"]");
+            user.SendKeys("dangkhoiktyknb@gmail.com");
+            
+            // next
+            var next = driver.FindElementByXPath("/html/body/div[1]/div[1]/div[2]/div[2]/div/div/div[2]/div/div[2]/div/div[1]/div/span/span");
+            next.Click();
+
+
+            //pass
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
+            
+
+            var pass = driver.FindElementByCssSelector(".I0VJ4d > div:nth-child(1) > input:nth-child(1)");
+          
+           if (pass != null)
+            {
+                
+
+                    Actions action1 = new Actions(driver);
+                    action1.MoveToElement(pass);
+                    action1.Click();
+                    action1.SendKeys("khoipro2h2");
+                    action1.Build().Perform();
+
+               } 
+            //next2
+           var next2 = driver.FindElementByCssSelector("#passwordNext > span:nth-child(3) > span:nth-child(1)");
+           next2.Click();
+
+            //driver.Quit();
+        }
+
+
+        
+        
+
+        private void Comment_t_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+            {
+
+         }
+
+
+        //----------------------fuction like and comment------------- 
+        public void like_comment()
+        {
+            email_t.Text = email;
+            pass_t.Text = pass1;
+            link_file_excel_t.Text = link;
+          
+            var driver = new FirefoxDriver();// create 
+
+            if (link_t.Text != null)
+            {
+                //driver.Url = link_t.Text;
+                driver.Url = link;
+            }
+
+            else
+            {
+
+                MessageBox.Show("nhap link");
+            }
+
+
+            //user-----------------------------------------
+            var user = driver.FindElementById("email");
+            
+            //user.SendKeys(email_t.Text);
+
+           // user.SendKeys(email);
+            //----------------------pass-------------------------------------
+
+            var pass = driver.FindElementById("pass");
+            //pass.SendKeys(pass_t.Text);
+            //pass.SendKeys(pass1);
+
+
+            //---------------------login----------------------------------------
+            var login = driver.FindElementById("loginbutton");
+            //login.Click();
+
+            //-------------------------------------------------------------
+           // driver.Navigate().Back();
+
+            if (user.Text != null && login.Text != null && pass.Text != null)
+            {
+                user.SendKeys(email);
+                pass.SendKeys(pass1);
+            
+
+                login.Click();
+            
+            }
+
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
+
+            //--------------------------like-----------------------------------
+
+            var like = driver.FindElementByCssSelector("._6iiu > span:nth-child(1) > div:nth-child(1) > div:nth-child(1) > a:nth-child(1)");
+            if (like.Text != null)
+            {
+                like.Click();
+            }
+            //---------------------------comment---------------
+
+
+            var comment = driver.FindElementByCssSelector("._6iiu > span:nth-child(2)");
+
+            if (comment != null)
+            {
+
+
+                Actions action1 = new Actions(driver);
+                action1.MoveToElement(comment);
+                action1.Click();
+                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(40);
+                //---------data comment---------
+                action1.SendKeys(Comment_t.Text);
+                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(40);
+                //------enter-------------
+                action1.SendKeys(OpenQA.Selenium.Keys.Enter);
+
+                action1.Build().Perform();
+
+                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(40);
+
+            }
+
+           //driver.Quit();
+        }
+
+        //------------------- fuction Full---------------------- 
+        public void Open_Click(object sender, EventArgs e)
+        {
+
+
+            string fname = "";
+            OpenFileDialog fdlg = new OpenFileDialog();
+           
+            fdlg.Title = "Excel File Dialog";
+            fdlg.InitialDirectory = @"c:\";
+            fdlg.Filter = "All files (*.*)|*.*|All files (*.*)|*.*";
+            fdlg.FilterIndex = 2;
+            fdlg.RestoreDirectory = true;
+            if (fdlg.ShowDialog() == DialogResult.OK)
+            {
+                fname = fdlg.FileName;
+                link_file_excel_t.Text = fname;
+            }
+
+
+            Microsoft.Office.Interop.Excel.Application xlApp = new Microsoft.Office.Interop.Excel.Application();
+            Microsoft.Office.Interop.Excel.Workbook xlWorkbook = xlApp.Workbooks.Open(fname);
+            Microsoft.Office.Interop.Excel._Worksheet xlWorksheet = xlWorkbook.Sheets[1];
+            Microsoft.Office.Interop.Excel.Range xlRange = xlWorksheet.UsedRange;
+
+            int rowCount = xlRange.Rows.Count;
+            int colCount = xlRange.Columns.Count;
+            
+      //------------test-------------------      
+      /*  email= xlRange.Cells[2, 1].Value2.ToString();
+        pass1 = xlRange.Cells[2,2].Value2.ToString();
+        link = xlRange.Cells[1, 3].Value2.ToString();
+        like_comment();*/
+            
+              for (int i = 1; i <= rowCount; i++)
+            {
+                // lay  email ; pass; link
+                    email = xlApp.Cells[i,1].Value2.ToString();
+                    pass1 = xlApp.Cells[i,2].Value2.ToString();
+                    link = xlApp.Cells[1,3].Value2.ToString();
+                    email_t.Text = email;
+                    pass_t.Text = pass1;
+
+                    link_file_excel_t.Text = link;
+                  //chay ham like vs commnet
+                  like_comment_2();
+                
+            }
+            
+            
+
+            //cleanup  
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            //rule of thumb for releasing com objects:  
+            //  never use two dots, all COM objects must be referenced and released individually  
+            //  ex: [somthing].[something].[something] is bad  
+
+            //release com objects to fully kill excel process from running in the background  
+            Marshal.ReleaseComObject(xlRange);
+            Marshal.ReleaseComObject(xlWorksheet);
+
+            //close and release  
+            xlWorkbook.Close();
+            Marshal.ReleaseComObject(xlWorkbook);
+
+            //quit and release  
+            xlApp.Quit();
+            Marshal.ReleaseComObject(xlApp);  
+  
+
+        }
+
+
+
+
+        public void like_comment_2()
+        {
+            email_t.Text = email;
+            pass_t.Text = pass1;
+            link_file_excel_t.Text = link;
+
+            var driver = new FirefoxDriver();// create 
+
+            if (link_t.Text != null)
+            {
+                //driver.Url = link_t.Text;
+                driver.Url = link;
+            }
+
+            else
+            {
+
+                MessageBox.Show("nhap link");
+            }
+
+
+            //user-----------------------------------------
+            WebDriverWait wait_user = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
+            wait_user.Until(ExpectedConditions.ElementExists(By.Id("email")));
+            var user = driver.FindElementById("email");
+            
+            //user.SendKeys(email_t.Text);
+
+            // user.SendKeys(email);
+            //----------------------pass-------------------------------------
+            WebDriverWait wait_pass = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
+            wait_pass.Until(ExpectedConditions.ElementExists(By.Id("pass")));
+            var pass = driver.FindElementById("pass");
+            //pass.SendKeys(pass_t.Text);
+            //pass.SendKeys(pass1);
+
+
+            //---------------------login----------------------------------------
+            WebDriverWait wait_login = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
+            wait_login.Until(ExpectedConditions.ElementExists(By.Id("loginbutton")));
+            var login = driver.FindElementById("loginbutton");
+            //login.Click();
+
+            //-------------------------------------------------------------
+            // driver.Navigate().Back();
+
+            if (user.Text != null && login.Text != null && pass.Text != null)
+            {
+                user.SendKeys(email);
+                pass.SendKeys(pass1);
+
+
+                login.Click();
+
+            }
+
+           
+
+            //--------------------------like-----------------------------------
+         
+            WebDriverWait wait_like = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
+            wait_like.Until(ExpectedConditions.ElementExists(By.CssSelector("._6iiu > span:nth-child(1) > div:nth-child(1) > div:nth-child(1) > a:nth-child(1)")));
+
+            var like = driver.FindElementByCssSelector("._6iiu > span:nth-child(1) > div:nth-child(1) > div:nth-child(1) > a:nth-child(1)");
+            if (like.Text != null)
+            {
+                like.Click();
+            }
+            //---------------------------comment---------------
+             WebDriverWait wait_comment = new WebDriverWait(driver, TimeSpan.FromSeconds(40));
+             wait_comment.Until(ExpectedConditions.ElementExists(By.CssSelector("._6iiu > span:nth-child(2)")));
+
+            var comment = driver.FindElementByCssSelector("._6iiu > span:nth-child(2)");
+
+            if (comment != null)
+            {
+
+
+                Actions action1 = new Actions(driver);
+                action1.MoveToElement(comment);
+                action1.Click();
+                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(40);
+                //---------data comment---------
+                action1.SendKeys(Comment_t.Text);
+                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(40);
+                //------enter-------------
+                action1.SendKeys(OpenQA.Selenium.Keys.Enter);
+
+                action1.Build().Perform();
+
+                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(40);
+
+            }
+
+            driver.Quit();
+        }
+
+
+
+
+
+       
+
+
+
+
+
+
+    }
+}
