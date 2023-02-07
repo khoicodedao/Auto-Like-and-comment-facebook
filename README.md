@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 this is my change
+=======
+This is conflict
+>>>>>>> 983fda0d965d2c0a4c7be41224ab0d02ae953cd5
 <h1 align="center">Hi 👋, I'm Ajay Aadhav VV</h1>
 <h3 align="center">A passionate Software Engineering student from India</h3>
 
